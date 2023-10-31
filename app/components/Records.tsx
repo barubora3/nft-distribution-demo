@@ -6,7 +6,7 @@ import { HomeProps } from "../page";
 interface Record {
   address: string;
   created_at: string;
-  txhash?: string;
+  txHash?: string;
   executed_at?: string;
 }
 
@@ -68,10 +68,10 @@ export default function Records({ setIsLoading }: HomeProps) {
                 <td className="px-2 py-1">{record.created_at}</td>
                 <td className="px-2 py-1 truncate  hover:underline">
                   <a
-                    href={`https://mumbai.polygonscan.com/tx/${record.txhash}`}
+                    href={`https://mumbai.polygonscan.com/tx/${record.txHash}`}
                     target="_blank"
                   >
-                    {record.txhash}
+                    {record.txHash}
                   </a>
                 </td>
                 <td className="px-2 py-1">{record.executed_at}</td>

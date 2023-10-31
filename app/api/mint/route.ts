@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@vercel/postgres";
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 import { ThirdwebSDK } from "@thirdweb-dev/sdk";
 const sdk = ThirdwebSDK.fromPrivateKey(process.env.PRIVATE_KEY!, "mumbai", {
@@ -10,13 +11,18 @@ const sdk = ThirdwebSDK.fromPrivateKey(process.env.PRIVATE_KEY!, "mumbai", {
 export async function GET() {
   // txHashがnull（=Mintトランザクション未実行）のレコードを抽出
   console.log("Mint関数スタート");
-  const client = await db.connect();
-  const result = await client.query(
-    `SELECT * FROM Request WHERE txHash IS NULL ORDER BY created_at;`
-  );
-  const recordsToBeUpdated = result.rows;
+  const targetRequests = await prisma.request.findMany({
+    where: {
+      txHash: {
+        equals: null,
+      },
+    },
+    orderBy: {
+      created_at: "asc",
+    },
+  });
 
-  console.log("未ミントレコード:" + result.rows.length);
+  console.log("未ミントレコード:" + targetRequests.length);
 
   // コントラクト
   const contract = await sdk.getContract(process.env.CONTRACT_ADDRESS!);
@@ -26,9 +32,12 @@ export async function GET() {
 
   // 1トランザクションで複数のmintを実行するため、txListにmintトランザクションの情報を詰める
   let txList = [];
-  for (const record of recordsToBeUpdated) {
+  for (const request of targetRequests) {
     // テスト用にmetadataを用意するのが面倒なのでuriは適当な文字列にしている
-    const tx = await contract.erc721.mintTo.prepare(record.address, "hogehoge");
+    const tx = await contract.erc721.mintTo.prepare(
+      request.address,
+      "hogehoge"
+    );
     txList.push(tx);
   }
 
@@ -43,14 +52,20 @@ export async function GET() {
   const txHash = res.receipt.transactionHash;
 
   // 今回Mintを実行したレコードのtxHashと実行時刻を更新
-  for (const record of recordsToBeUpdated) {
-    await await client.query(
-      `UPDATE Request SET txHash = '${txHash}', executed_at = '${currentTime}' WHERE user_id = ${record.user_id};`
-    );
+  for (const request of targetRequests) {
+    const updatedRequest = await prisma.request.update({
+      where: {
+        id: request.id,
+      },
+      data: {
+        txHash: txHash,
+        executed_at: currentTime,
+      },
+    });
   }
   console.log("Mint関数終了");
   return NextResponse.json(
-    { mintNum: result.rows.length, txHash },
+    { mintNum: targetRequests.length, txHash },
     { status: 200 }
   );
 }

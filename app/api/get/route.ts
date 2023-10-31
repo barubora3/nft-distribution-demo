@@ -1,24 +1,25 @@
 import { NextResponse } from "next/server";
-import { db, sql, createClient } from "@vercel/postgres";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 export async function GET() {
-  const client = createClient();
-  await client.connect();
   let result;
   try {
-    result = await client.sql`SELECT * FROM Request ORDER BY created_at DESC;`;
-    // const result = await sql`SELECT * FROM Request ORDER BY created_at DESC;`;
+    result = await prisma.request.findMany({
+      orderBy: {
+        created_at: "desc",
+      },
+    });
 
-    await client.end();
+    console.log(result);
     return NextResponse.json(
-      { records: result.rows },
+      { records: result },
       {
         status: 200,
       }
     );
   } catch (e) {
     console.error(e);
-    await client.end();
     return NextResponse.json({ e }, { status: 500 });
   }
 }
