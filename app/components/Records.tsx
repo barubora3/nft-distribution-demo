@@ -63,7 +63,14 @@ export default function Records({ setIsLoading }: HomeProps) {
               <tr key={index}>
                 <td className="px-2 py-1">{record.address}</td>
                 <td className="px-2 py-1">{record.created_at}</td>
-                <td className="px-2 py-1 truncate">{record.txhash}</td>
+                <td className="px-2 py-1 truncate  hover:underline">
+                  <a
+                    href={`https://mumbai.polygonscan.com/tx/${record.txhash}`}
+                    target="_blank"
+                  >
+                    {record.txhash}
+                  </a>
+                </td>
                 <td className="px-2 py-1">{record.executed_at}</td>
               </tr>
             ))}
