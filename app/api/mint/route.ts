@@ -12,7 +12,7 @@ export async function GET() {
   console.log("Mint関数スタート");
   const client = await db.connect();
   const result = await client.query(
-    `SELECT * FROM Users WHERE txHash IS NULL ORDER BY created_at;`
+    `SELECT * FROM Request WHERE txHash IS NULL ORDER BY created_at;`
   );
   const recordsToBeUpdated = result.rows;
 
@@ -45,7 +45,7 @@ export async function GET() {
   // 今回Mintを実行したレコードのtxHashと実行時刻を更新
   for (const record of recordsToBeUpdated) {
     await await client.query(
-      `UPDATE Users SET txHash = '${txHash}', executed_at = '${currentTime}' WHERE user_id = ${record.user_id};`
+      `UPDATE Request SET txHash = '${txHash}', executed_at = '${currentTime}' WHERE user_id = ${record.user_id};`
     );
   }
   console.log("Mint関数終了");

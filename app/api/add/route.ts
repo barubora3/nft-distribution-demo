@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   const address = data.address;
 
   try {
-    await sql`INSERT INTO Users (address, created_at) VALUES (${address}, CURRENT_TIMESTAMP);`;
+    await sql`INSERT INTO Request (address, created_at) VALUES (${address}, CURRENT_TIMESTAMP);`;
 
     return NextResponse.json("success");
   } catch (e) {
