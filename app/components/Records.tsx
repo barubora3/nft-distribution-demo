@@ -19,6 +19,7 @@ export default function Records({ setIsLoading }: HomeProps) {
     setIsLoading(true);
     const response = await fetch("/api/get", {
       method: "GET",
+      cache: "no-cache",
     });
     const data = await response.json();
     console.log(data.records);
