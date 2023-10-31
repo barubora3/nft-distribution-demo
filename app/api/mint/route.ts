@@ -9,11 +9,14 @@ const sdk = ThirdwebSDK.fromPrivateKey(process.env.PRIVATE_KEY!, "mumbai", {
 
 export async function GET() {
   // txHashがnull（=Mintトランザクション未実行）のレコードを抽出
+  console.log("Mint関数スタート");
   const client = await db.connect();
   const result = await client.query(
     `SELECT * FROM Users WHERE txHash IS NULL ORDER BY created_at;`
   );
   const recordsToBeUpdated = result.rows;
+
+  console.log("未ミントレコード:" + result.rows.length);
 
   // コントラクト
   const contract = await sdk.getContract(process.env.CONTRACT_ADDRESS!);
@@ -33,8 +36,9 @@ export async function GET() {
   const encodedTransactions = txList.map((tx) => tx.encode());
 
   // multicallでまとめて実行
+  console.log("Tx実行開始");
   const res = await contract.call("multicall", [encodedTransactions]);
-
+  console.log("Tx実行終了");
   // txHashを取得
   const txHash = res.receipt.transactionHash;
 
@@ -44,6 +48,6 @@ export async function GET() {
       `UPDATE Users SET txHash = '${txHash}', executed_at = '${currentTime}' WHERE user_id = ${record.user_id};`
     );
   }
-
+  console.log("Mint関数終了");
   return NextResponse.json({});
 }
