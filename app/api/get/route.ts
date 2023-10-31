@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
-import { db, sql } from "@vercel/postgres";
+import { db, sql, createClient } from "@vercel/postgres";
 
 export async function GET() {
+  const client = createClient();
+  await client.connect();
+  let result;
   try {
-    const client = await db.connect();
-    const result = await client.query(
-      "SELECT * FROM Request ORDER BY created_at DESC;"
-    );
+    result = await client.sql`SELECT * FROM Request ORDER BY created_at DESC;`;
     // const result = await sql`SELECT * FROM Request ORDER BY created_at DESC;`;
 
+    await client.end();
     return NextResponse.json(
       { records: result.rows },
       {
@@ -17,6 +18,7 @@ export async function GET() {
     );
   } catch (e) {
     console.error(e);
+    await client.end();
     return NextResponse.json({ e }, { status: 500 });
   }
 }
