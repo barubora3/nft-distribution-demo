@@ -49,5 +49,8 @@ export async function GET() {
     );
   }
   console.log("Mint関数終了");
-  return NextResponse.json({});
+  return NextResponse.json(
+    { mintNum: result.rows.length, txHash },
+    { status: 200 }
+  );
 }

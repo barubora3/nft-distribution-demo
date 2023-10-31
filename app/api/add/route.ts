@@ -8,9 +8,9 @@ export async function POST(req: NextRequest) {
   try {
     await sql`INSERT INTO Request (address, created_at) VALUES (${address}, CURRENT_TIMESTAMP);`;
 
-    return NextResponse.json("success");
+    return NextResponse.json({ message: "success" }, { status: 200 });
   } catch (e) {
     console.log(e);
-    return NextResponse.json("error");
+    return NextResponse.json({ e }, { status: 500 });
   }
 }

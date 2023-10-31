@@ -9,9 +9,14 @@ export async function GET() {
     );
     // const result = await sql`SELECT * FROM Request ORDER BY created_at DESC;`;
 
-    return NextResponse.json({ records: result.rows });
+    return NextResponse.json(
+      { records: result.rows },
+      {
+        status: 200,
+      }
+    );
   } catch (e) {
-    console.log(e);
-    return NextResponse.json("error");
+    console.error(e);
+    return NextResponse.json({ e }, { status: 500 });
   }
 }
