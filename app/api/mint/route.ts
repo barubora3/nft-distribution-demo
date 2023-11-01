@@ -3,10 +3,18 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 import { ThirdwebSDK } from "@thirdweb-dev/sdk";
-const sdk = ThirdwebSDK.fromPrivateKey(process.env.PRIVATE_KEY!, "mumbai", {
-  clientId: process.env.THIRDWEB_CLIENT_ID!,
-  secretKey: process.env.THIRDWEB_SECRET_KEY!,
-});
+const sdk = ThirdwebSDK.fromPrivateKey(
+  process.env.PRIVATE_KEY!,
+  // "mumbai",
+  "https://polygon-mumbai-bor.publicnode.com",
+  {
+    clientId: process.env.THIRDWEB_CLIENT_ID!,
+    secretKey: process.env.THIRDWEB_SECRET_KEY!,
+  }
+);
+const provider = sdk.getProvider();
+
+export const revalidate = 0;
 
 export async function GET() {
   // txHashがnull（=Mintトランザクション未実行）のレコードを抽出
@@ -24,6 +32,13 @@ export async function GET() {
 
   console.log("未ミントレコード:" + targetRequests.length);
 
+  const transactionCount = await provider.getTransactionCount(
+    await sdk.wallet.getAddress(),
+    "latest"
+  );
+  // console.log(transactionCount);
+  // const nonce = await sdk.wallet.getNonce();
+  // console.log("nonce:" + nonce);
   // コントラクト
   const contract = await sdk.getContract(process.env.CONTRACT_ADDRESS!);
 
