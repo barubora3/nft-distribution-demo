@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const runtime = "edge";
+export const revalidate = 0;
 
 export async function GET() {
   let result;
@@ -18,11 +18,6 @@ export async function GET() {
       { records: result },
       {
         status: 200,
-        headers: {
-          "Cache-Control": "no-store",
-          "CDN-Cache-Control": "no-store",
-          "Vercel-CDN-Cache-Control": "no-store",
-        },
       }
     );
   } catch (e) {
